@@ -25,6 +25,7 @@ pnpm install
 | 10 | Promises & Async | `10-promises-and-async.js` | `10-promises-and-async.ts` |
 | 11 | Gradual Migration | `11-gradual-migration.js` | `11-gradual-migration.ts` + `.d.ts` |
 | 12 | End-to-End Example | `12-end-to-end.js` | `12-end-to-end.ts` |
+| 99 | Advanced: Route Types | — | `99-advanced-route-types.ts` |
 
 ## Session Planning
 
@@ -48,6 +49,14 @@ Bonus material for longer sessions or Q&A:
 - Typed async/await and API responses
 - Migrating existing JavaScript codebases
 - Real-world refactoring demonstrations
+
+### Mind-Blowing Bonus (99)
+**Time: 10-15 minutes**
+
+For audiences who want to see TypeScript's full power:
+- Type-level string parsing (template literal types)
+- How modern frameworks achieve zero-codegen type safety
+- "Turing-complete types" in action
 
 ## Running Examples
 
@@ -164,6 +173,14 @@ npx tsc examples/typescript/01-basics.ts --outDir dist
 - 10+ intentional bugs in JS version
 - TS version catches all at compile time
 - Refactoring demo: rename a property and fix all usages
+
+### 99-advanced-route-types
+**Type-Level String Parsing (Bonus)**
+- Parses `/users/:userId/posts/:postId` at the **type level**
+- Extracts parameter names as a union type
+- Builds typed parameter objects automatically
+- Demonstrates template literal types and conditional types
+- Shows how libraries like tRPC/Hono achieve end-to-end type safety
 
 ## Key Takeaways
 
