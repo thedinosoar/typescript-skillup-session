@@ -227,19 +227,78 @@ function mutate(user) { user.name = "changed"; }
 
 ## **14. Event Loop & Async Nature**
 
-JavaScript is single-threaded but async via:
+### **Single-Threaded Execution**
 
-* Call stack
-* Event loop
-* Microtasks (Promises)
-* Macrotasks (Timers, I/O)
+JavaScript runs on a **single thread** — there's only one call stack, and only one thing can execute at a time. Unlike C# or Java, there are no background threads running your code in parallel.
 
 ```js
-console.log(1);
-promise.then(() => console.log(2));
-console.log(3);
-// 1, 3, 2
+// These run sequentially, blocking each other
+heavyComputation();  // blocks until done
+anotherFunction();   // can't start until the above finishes
 ```
+
+So how does JavaScript handle async operations without freezing the browser? The answer is the **event loop**.
+
+### **The Call Stack**
+
+The call stack tracks what function is currently executing. When you call a function, it's pushed onto the stack. When it returns, it's popped off.
+
+```js
+function a() { b(); }
+function b() { c(); }
+function c() { console.log("hi"); }
+a();
+// Stack: a → b → c → (empty)
+```
+
+If the stack is busy, nothing else can run — the UI freezes, clicks don't register.
+
+### **The Event Loop**
+
+The event loop is JavaScript's secret weapon. It continuously checks: *"Is the call stack empty? If yes, grab the next task from the queue."*
+
+```
+┌─────────────────────────────┐
+│         Call Stack          │  ← JS runs code here (one thing at a time)
+└─────────────────────────────┘
+              ↑
+              │ (when empty, pull from queues)
+              │
+┌─────────────────────────────┐
+│   Microtask Queue           │  ← Promises, queueMicrotask() [HIGH PRIORITY]
+└─────────────────────────────┘
+              │
+┌─────────────────────────────┐
+│   Macrotask Queue           │  ← setTimeout, setInterval, I/O [LOWER PRIORITY]
+└─────────────────────────────┘
+```
+
+### **Async Operations Don't Block**
+
+When you call `setTimeout` or `fetch`, the browser/Node handles the waiting *outside* of JavaScript. When the result is ready, a callback is queued.
+
+```js
+console.log("1");
+setTimeout(() => console.log("2"), 0);  // queued as macrotask
+Promise.resolve().then(() => console.log("3"));  // queued as microtask
+console.log("4");
+
+// Output: 1, 4, 3, 2
+// Why? Microtasks (Promises) run before macrotasks (setTimeout)
+```
+
+### **Why This Matters**
+
+* **Long-running sync code blocks everything** — avoid heavy loops on the main thread.
+* **Promises resolve before timers** — microtasks have priority.
+* **"0ms" setTimeout isn't instant** — it just means "next macrotask cycle."
+* **async/await is syntactic sugar** — it's still using Promises and the event loop under the hood.
+
+### **What About Web Workers?**
+
+If you truly need parallel execution, **Web Workers** let you spawn background threads. But they run in isolation — no DOM access, and you typically communicate via message passing (`postMessage`). They're useful for CPU-heavy tasks like image processing or complex calculations, but they're a separate concept from the event loop.
+
+For advanced use cases, **SharedArrayBuffer** allows actual shared memory between threads. Combined with **Atomics** for synchronization, you can build lock-free data structures and true parallel algorithms. However, due to security concerns (Spectre), SharedArrayBuffer requires specific HTTP headers (`Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy`) to be enabled.
 
 ---
 
